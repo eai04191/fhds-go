@@ -13,9 +13,11 @@ import (
 )
 
 // Run drives the trigger loop until ctx is cancelled or the watched game exits.
-func Run(ctx context.Context, ds *dualsense.DualSense, l *udp.Listener, s *settings.Settings) {
+// Settings are read from the store every frame so hot-reload takes effect on
+// the next packet without restarting the backend.
+func Run(ctx context.Context, ds *dualsense.DualSense, l *udp.Listener, store *settings.Store) {
 	off := dualsense.OffFrame()
-	ctrl := dualsense.NewController(s)
+	ctrl := dualsense.NewController(store.Get())
 
 	var prevL, prevR dualsense.Frame
 	prevSet := false
@@ -24,10 +26,12 @@ func Run(ctx context.Context, ds *dualsense.DualSense, l *udp.Listener, s *setti
 	lastLog := time.Time{}
 	pktCount := 0
 
+	// Exit-watcher config is captured once at startup — game_process_name_contains
+	// and game_poll_interval_s are not hot-reloaded.
 	var watcher *exitdetect.Watcher
-	if s.ExitOnGameClose {
-		watcher = exitdetect.New(s.GameProcessNameContains,
-			time.Duration(s.GamePollIntervalS*float64(time.Second)))
+	if init := store.Get(); init.ExitOnGameClose {
+		watcher = exitdetect.New(init.GameProcessNameContains,
+			time.Duration(init.GamePollIntervalS*float64(time.Second)))
 	}
 
 	for {
@@ -36,6 +40,7 @@ func Run(ctx context.Context, ds *dualsense.DualSense, l *udp.Listener, s *setti
 			return
 		default:
 		}
+		s := store.Get()
 		now := time.Now()
 		if watcher != nil && watcher.ShouldExit() {
 			log.Printf("Game process closed — exiting.")
