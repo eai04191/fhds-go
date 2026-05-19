@@ -34,4 +34,9 @@ Both triggers briefly stiffen on launch once the DualSense is recognized.
 
 ## License
 
-AGPL-3.0-or-later (inherited from [upstream](https://github.com/HamzaYslmn/Forza-Horizon-DualSense-Python)). See [LICENSE](LICENSE).
+AGPL-3.0-or-later. See [LICENSE](LICENSE).
+
+This project is a modified work derived from
+[HamzaYslmn/Forza-Horizon-DualSense-Python](https://github.com/HamzaYslmn/Forza-Horizon-DualSense-Python)
+(© HamzaYslmn, AGPL-3.0).
+Ported from Python to Go (headless, Windows-only) by Eai, 2026-05-19.
