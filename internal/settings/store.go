@@ -68,8 +68,14 @@ func LoadOrCreate(path string) (Settings, error) {
 
 func load(path string) (Settings, error) {
 	s := Default()
-	if _, err := toml.DecodeFile(path, &s); err != nil {
+	meta, err := toml.DecodeFile(path, &s)
+	if err != nil {
 		return Settings{}, fmt.Errorf("parse %s: %w", path, err)
+	}
+	// Unknown keys are silently dropped by the decoder; warn so a typo doesn't
+	// quietly revert the intended field to its Default().
+	for _, key := range meta.Undecoded() {
+		log.Printf("Config: unknown key %q — typo? value falls back to built-in default", key)
 	}
 	return s, nil
 }
