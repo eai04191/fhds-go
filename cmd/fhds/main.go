@@ -22,8 +22,7 @@ import (
 )
 
 func main() {
-	host := flag.String("host", "127.0.0.1", "UDP bind address")
-	port := flag.Int("port", 0, "UDP port (default 5300)")
+	configPath := flag.String("config", "", "Path to fhds-config.toml (default: next to the exe)")
 	debug := flag.Bool("debug", false, "Verbose per-packet logs")
 	listHID := flag.Bool("list-hid", false, "Dump every HID interface visible to this process and exit")
 	flag.Parse()
@@ -37,14 +36,18 @@ func main() {
 		return
 	}
 
-	s := settings.Default()
-	if *host != "" {
-		s.UDPHost = *host
+	path := *configPath
+	if path == "" {
+		path = settings.DefaultConfigPath()
 	}
-	if *port != 0 {
-		s.UDPPort = *port
+	initial, err := settings.LoadOrCreate(path)
+	if err != nil {
+		log.Fatalf("Config load failed: %v", err)
 	}
+	store := settings.NewStore(initial)
+	log.Printf("Config: loaded %s", path)
 
+	s := store.Get()
 	ds := dualsense.New(dualsense.Options{
 		StartupPulseForce:  s.StartupPulseForce,
 		EnableStartupPulse: s.EnableStartupPulse,
@@ -67,7 +70,21 @@ func main() {
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer cancel()
 
-	loop.Run(ctx, ds, l, &s)
+	if err := settings.Watch(ctx, path, store, func(prev, next *settings.Settings) {
+		if prev.EnableReconnect != next.EnableReconnect {
+			ds.SetReconnectEnabled(next.EnableReconnect)
+		}
+		if prev.ReconnectIntervalS != next.ReconnectIntervalS {
+			ds.SetReconnectInterval(time.Duration(next.ReconnectIntervalS * float64(time.Second)))
+		}
+		if prev.UDPHost != next.UDPHost || prev.UDPPort != next.UDPPort || prev.UDPTimeout != next.UDPTimeout {
+			log.Printf("Config: UDP bind / timeout change requires restart to take effect")
+		}
+	}); err != nil {
+		log.Printf("Config: watcher disabled — %v", err)
+	}
+
+	loop.Run(ctx, ds, l, store)
 }
 
 // dumpHID lists every HID interface this process can see — diagnostic for

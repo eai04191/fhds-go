@@ -278,19 +278,24 @@ func (a *TriggerAnimations) ThrottleRamp(t *udp.Telemetry, s *settings.Settings)
 
 // Controller resolves the per-tick priority chain for both triggers.
 type Controller struct {
-	anim     TriggerAnimations
-	wall     Frame
-	l2InWall bool
-	r2InWall bool
+	anim      TriggerAnimations
+	wall      Frame
+	wallZones int
+	l2InWall  bool
+	r2InWall  bool
 }
 
 func NewController(s *settings.Settings) *Controller {
-	return &Controller{wall: BuildWall(s.WallZones)}
+	return &Controller{wall: BuildWall(s.WallZones), wallZones: s.WallZones}
 }
 
 func (c *Controller) Update(t *udp.Telemetry, s *settings.Settings) (left, right Frame) {
 	if !t.On {
 		return OffFrame(), OffFrame()
+	}
+	if s.WallZones != c.wallZones {
+		c.wall = BuildWall(s.WallZones)
+		c.wallZones = s.WallZones
 	}
 	now := time.Now()
 	if s.EnableGearShift || s.EnableGearShiftBrake {

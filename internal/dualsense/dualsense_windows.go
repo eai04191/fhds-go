@@ -119,6 +119,27 @@ func (d *DualSense) Connected() bool {
 	return d.dev != nil
 }
 
+// SetReconnectEnabled toggles auto-reconnect on drop. Mirrors Python's
+// DualSense.set_reconnect_enabled — exposed so config hot-reload can apply
+// the change without restarting the backend.
+func (d *DualSense) SetReconnectEnabled(v bool) {
+	d.mu.Lock()
+	d.enableReconnect = v
+	d.mu.Unlock()
+	d.signalWake()
+}
+
+// SetReconnectInterval updates the throttle between reconnect attempts.
+func (d *DualSense) SetReconnectInterval(v time.Duration) {
+	if v <= 0 {
+		return
+	}
+	d.mu.Lock()
+	d.reconnectInterval = v
+	d.mu.Unlock()
+	d.signalWake()
+}
+
 // Open starts the I/O goroutine. Never returns an error — the controller may
 // be absent and the loop will keep retrying.
 func (d *DualSense) Open() {
@@ -301,6 +322,8 @@ func (d *DualSense) ioLoop() {
 		running := d.running
 		connected := d.dev != nil
 		persistent := d.persistent
+		enableReconnect := d.enableReconnect
+		reconnectInterval := d.reconnectInterval
 		d.mu.Unlock()
 		if !running {
 			return
@@ -310,8 +333,8 @@ func (d *DualSense) ioLoop() {
 
 		// Disconnected: throttled reconnect attempts.
 		if !connected {
-			if d.enableReconnect || !d.everConnected {
-				if now.Sub(d.lastAttempt) >= d.reconnectInterval {
+			if enableReconnect || !d.everConnected {
+				if now.Sub(d.lastAttempt) >= reconnectInterval {
 					d.lastAttempt = now
 					d.tryConnect()
 				}

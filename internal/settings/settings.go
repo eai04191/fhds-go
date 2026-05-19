@@ -3,68 +3,70 @@ package settings
 
 // Settings is the full set of FH DualSense tunables.
 // Forces are 0-255, frequencies in Hz.
+// TOML tags use snake_case to match the Python field names so configs are
+// recognizable to anyone coming from the upstream project.
 type Settings struct {
 	// UDP
-	UDPHost    string
-	UDPPort    int
-	UDPTimeout float64
+	UDPHost    string  `toml:"udp_host"`
+	UDPPort    int     `toml:"udp_port"`
+	UDPTimeout float64 `toml:"udp_timeout"`
 
 	// Shared pedal config
-	PedalValueMax int
-	WallZones     int
+	PedalValueMax int `toml:"pedal_value_max"`
+	WallZones     int `toml:"wall_zones"`
 
 	// L2 — Brake
-	EnableBrakeResistance bool
-	BrakeDeadzone         int
-	BrakeBaselineForce    int
-	BrakeMaxForce         int
-	BrakeCurve            float64
-	BrakeWallEngageAt     int
-	BrakeWallReleaseAt    int
+	EnableBrakeResistance bool    `toml:"enable_brake_resistance"`
+	BrakeDeadzone         int     `toml:"brake_deadzone"`
+	BrakeBaselineForce    int     `toml:"brake_baseline_force"`
+	BrakeMaxForce         int     `toml:"brake_max_force"`
+	BrakeCurve            float64 `toml:"brake_curve"`
+	BrakeWallEngageAt     int     `toml:"brake_wall_engage_at"`
+	BrakeWallReleaseAt    int     `toml:"brake_wall_release_at"`
 
-	EnableHandbrakeBonus bool
-	HandbrakeBonus       int
+	EnableHandbrakeBonus bool `toml:"enable_handbrake_bonus"`
+	HandbrakeBonus       int  `toml:"handbrake_bonus"`
 
-	EnableABS                bool
-	ABSBrakeThreshold        int
-	ABSMinSpeedKMH           float64
-	ABSSlipRatioThreshold    float64
-	ABSCombinedSlipThreshold float64
-	ABSFreq                  int
-	ABSAmp                   int
+	EnableABS                bool    `toml:"enable_abs"`
+	ABSBrakeThreshold        int     `toml:"abs_brake_threshold"`
+	ABSMinSpeedKMH           float64 `toml:"abs_min_speed_kmh"`
+	ABSSlipRatioThreshold    float64 `toml:"abs_slip_ratio_threshold"`
+	ABSCombinedSlipThreshold float64 `toml:"abs_combined_slip_threshold"`
+	ABSFreq                  int     `toml:"abs_freq"`
+	ABSAmp                   int     `toml:"abs_amp"`
 
 	// R2 — Throttle
-	EnableThrottleResistance bool
-	AccelDeadzone            int
-	ThrottleBaselineForce    int
-	ThrottleMaxForce         int
-	ThrottleCurve            float64
-	ThrottleWallEngageAt     int
-	ThrottleWallReleaseAt    int
+	EnableThrottleResistance bool    `toml:"enable_throttle_resistance"`
+	AccelDeadzone            int     `toml:"accel_deadzone"`
+	ThrottleBaselineForce    int     `toml:"throttle_baseline_force"`
+	ThrottleMaxForce         int     `toml:"throttle_max_force"`
+	ThrottleCurve            float64 `toml:"throttle_curve"`
+	ThrottleWallEngageAt     int     `toml:"throttle_wall_engage_at"`
+	ThrottleWallReleaseAt    int     `toml:"throttle_wall_release_at"`
 
-	EnableRevLimiter bool
-	RevLimitRatio    float64
-	RevLimitFreq     int
-	RevLimitAmp      int
-	RevLimitHoldMS   float64
+	EnableRevLimiter bool    `toml:"enable_rev_limiter"`
+	RevLimitRatio    float64 `toml:"rev_limit_ratio"`
+	RevLimitFreq     int     `toml:"rev_limit_freq"`
+	RevLimitAmp      int     `toml:"rev_limit_amp"`
+	RevLimitHoldMS   float64 `toml:"rev_limit_hold_ms"`
 
-	EnableGearShift      bool
-	EnableGearShiftBrake bool
-	GearShiftFreq        int
-	GearShiftAmp         int
-	GearShiftDurationMS  float64
+	EnableGearShift      bool    `toml:"enable_gear_shift"`
+	EnableGearShiftBrake bool    `toml:"enable_gear_shift_brake"`
+	GearShiftFreq        int     `toml:"gear_shift_freq"`
+	GearShiftAmp         int     `toml:"gear_shift_amp"`
+	GearShiftDurationMS  float64 `toml:"gear_shift_duration_ms"`
 
 	// System
-	EnableStartupPulse bool
-	StartupPulseForce  int
+	EnableStartupPulse bool `toml:"enable_startup_pulse"`
+	StartupPulseForce  int  `toml:"startup_pulse_force"`
 
-	EnableReconnect    bool
-	ReconnectIntervalS float64
+	EnableReconnect    bool    `toml:"enable_reconnect"`
+	ReconnectIntervalS float64 `toml:"reconnect_interval_s"`
 
-	ExitOnGameClose         bool
-	GameProcessNameContains []string
-	GamePollIntervalS       float64
-	TelemetryLostExitS      float64
+	ExitOnGameClose         bool     `toml:"exit_on_game_close"`
+	GameProcessNameContains []string `toml:"game_process_name_contains"`
+	GamePollIntervalS       float64  `toml:"game_poll_interval_s"`
+	TelemetryLostExitS      float64  `toml:"telemetry_lost_exit_s"`
 }
 
 // Default returns the same defaults as the Python Settings dataclass.

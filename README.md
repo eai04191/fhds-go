@@ -27,6 +27,16 @@ go build -o bin/fhds.exe ./cmd/fhds
 
 Both triggers briefly stiffen on launch once the DualSense is recognized.
 
+## Config
+
+On first launch, `fhds-config.toml` is written next to the exe with documented
+defaults. Edit it and **save while fhds.exe is running** — values hot-reload
+within ~150 ms. Bad TOML keeps the previous snapshot and logs the parse error.
+
+Use `--config path\to\fhds-config.toml` to point at a different file (e.g. for
+profile switching from a shortcut). `udp_host` / `udp_port` changes require a
+restart.
+
 ## Tested with
 
 - Forza Horizon 6 (Xbox / Microsoft Store version)
