@@ -98,7 +98,7 @@ func Watch(ctx context.Context, path string, store *Store, onReload ReloadCallba
 	}
 
 	go func() {
-		defer w.Close()
+		defer func() { _ = w.Close() }()
 		var debounce *time.Timer
 		fire := make(chan struct{}, 1)
 		schedule := func() {
